@@ -1,0 +1,132 @@
+<!-- Controles superiores -->
+<div class="controls">
+  <ion-searchbar
+    placeholder="Buscar platillos..."
+    (ionInput)="onSearch($any($event.target).value || '')"
+    showClearButton="focus"
+    class="search"
+  ></ion-searchbar>
+
+  <div class="row">
+    <ion-segment [value]="filtro" (ionChange)="onFiltroChange($any($event.detail).value)">
+      <ion-segment-button value="todos">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="disponibles">
+        <ion-label>Disponibles</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Botón de “Nuevo platillo” -->
+    <ion-button class="btn-nuevo" size="default" type="button" (click)="abrirNuevo($event)">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Nuevo platillo
+    </ion-button>
+  </div>
+</div>
+
+<!-- Estado: cargando -->
+<ng-container *ngIf="loading">
+  <div class="grid">
+    <ion-card *ngFor="let n of [1,2,3,4,5,6]" class="dish-card">
+      <ion-card-content>
+        <div class="top">
+          <ion-badge><ion-skeleton-text [animated]="true" style="width: 56px"></ion-skeleton-text></ion-badge>
+        </div>
+        <div class="title"><ion-skeleton-text [animated]="true" style="width: 70%"></ion-skeleton-text></div>
+        <div class="subtitle"><ion-skeleton-text [animated]="true" style="width: 90%"></ion-skeleton-text></div>
+        <div class="bottom">
+          <div class="price"><ion-skeleton-text [animated]="true" style="width: 70px; height: 18px"></ion-skeleton-text></div>
+          <div class="actions">
+            <ion-button size="small" fill="clear" disabled><ion-icon name="create-outline"></ion-icon></ion-button>
+            <ion-button size="small" fill="clear" disabled><ion-icon name="trash-outline"></ion-icon></ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ng-container>
+
+<!-- Estado: error -->
+<ng-container *ngIf="!loading && error">
+  <div class="state">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <p>No se pudo cargar el menú.</p>
+    <ion-button (click)="load()">Reintentar</ion-button>
+  </div>
+</ng-container>
+
+<!-- Estado: vacío -->
+<ng-container *ngIf="!loading && !error && listaFiltrada.length === 0">
+  <div class="state">
+    <ion-icon name="restaurant-outline" size="large"></ion-icon>
+    <p>Sin resultados. Ajusta filtros o búsqueda.</p>
+  </div>
+</ng-container>
+
+<!-- Grid de platillos -->
+<ng-container *ngIf="!loading && !error && listaFiltrada.length">
+  <div class="grid">
+    <ion-card *ngFor="let p of listaFiltrada" class="dish-card" [class.is-off]="!p.disponible">
+      <ion-card-content>
+        <div class="top">
+          <ion-badge [color]="p.disponible ? 'success' : 'medium'">
+            {{ p.disponible ? 'Disponible' : 'Agotado' }}
+          </ion-badge>
+        </div>
+
+        <div class="title">{{ p.nombre }}</div>
+        <div class="subtitle clamp-2">{{ p.descripcion }}</div>
+
+        <div class="bottom">
+          <div class="price">{{ p.precio | currency:'MXN':'symbol':'1.0-0' }}</div>
+
+          <!-- Acciones: Editar / Eliminar -->
+          <div class="actions">
+            <ion-button size="small" fill="clear" type="button" (click)="abrirEditar(p, $event)">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button size="small" fill="clear" color="danger" type="button" (click)="eliminar(p, $event)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <div class="spacer"></div>
+</ng-container>
+
+<!-- Modal Crear/Editar -->
+<ion-modal [isOpen]="showModal" (didDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ isEditing ? 'Editar platillo' : 'Nuevo platillo' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+        <ion-input label="Nombre" labelPlacement="stacked" formControlName="nombre" placeholder="Ej. Pizza de Frijoles"></ion-input>
+        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" rows="3" placeholder="Breve descripción..."></ion-textarea>
+        <ion-input type="number" label="Precio (MXN)" labelPlacement="stacked" formControlName="precio"></ion-input>
+        <div class="toggle-row">
+          <ion-label>Disponible</ion-label>
+          <ion-toggle formControlName="disponible"></ion-toggle>
+        </div>
+
+        <ion-button expand="block" type="submit" [disabled]="form.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ isEditing ? 'Guardar cambios' : 'Crear platillo' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Toast -->
+<ion-toast [isOpen]="showToast" [message]="toastMsg" position="bottom" duration="1600"></ion-toast>

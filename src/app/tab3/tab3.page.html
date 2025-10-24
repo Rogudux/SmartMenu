@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      Clientes
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,9 +9,19 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
+      <ion-title size="large">Clientes</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <div class="filter-wrap">
+  <!-- (si no hay filtros aquí, solo deja el botón) -->
+  <ion-button class="btn-nuevo" (click)="clientes.abrirNuevo()">
+   <ion-icon name="add-outline" slot="start"></ion-icon>
+   Nuevo cliente
+  </ion-button>
+</div>
+
+<app-lista-clientes #clientes></app-lista-clientes>
+
+
 </ion-content>

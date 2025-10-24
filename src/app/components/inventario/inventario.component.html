@@ -1,0 +1,235 @@
+<!-- Controles Inventario -->
+<div class="controls">
+  <ion-searchbar
+    placeholder="Buscar insumo..."
+    (ionInput)="onSearch($any($event.target).value || '')"
+    showClearButton="focus"
+    class="search"
+  ></ion-searchbar>
+
+  <div class="bar">
+    <ion-button class="btn-nuevo" (click)="abrirNuevo()">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Nuevo insumo
+    </ion-button>
+  </div>
+</div>
+
+<!-- Inventario: estados + lista -->
+<ng-container *ngIf="loading">
+  <ion-list class="inv-list">
+    <ion-item *ngFor="let n of [1,2,3,4]" lines="full" class="inv-item">
+      <ion-icon slot="start" name="cube-outline"></ion-icon>
+      <ion-label>
+        <h2><ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text></h2>
+        <p><ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ng-container>
+
+<ng-container *ngIf="!loading && error">
+  <div class="state">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <p>No se pudo cargar el inventario.</p>
+    <ion-button (click)="reload()">Reintentar</ion-button>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loading && !error && listaFiltrada.length === 0">
+  <div class="state">
+    <ion-icon name="cube-outline" size="large"></ion-icon>
+    <p>Sin insumos.</p>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loading && !error && listaFiltrada.length">
+  <ion-list class="inv-list">
+    <ion-item
+      *ngFor="let it of listaFiltrada; trackBy: trackById"
+      lines="full"
+      class="inv-item"
+    >
+      <ion-icon slot="start" name="cube-outline"></ion-icon>
+
+      <ion-label>
+        <h2>{{ it.nombreInsumo }}</h2>
+        <p class="meta">
+          <ion-icon name="layers-outline"></ion-icon>
+          {{ it.cantidad }} {{ it.unidad }}
+        </p>
+      </ion-label>
+
+      <div slot="end" class="actions">
+        <ion-button size="small" fill="clear" (click)="abrirEditar(it)">
+          <ion-icon name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="eliminar(it)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+</ng-container>
+
+<!-- Modal Crear/Editar Insumo -->
+<ion-modal [isOpen]="showModal" (didDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ isEditing ? 'Editar insumo' : 'Nuevo insumo' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+        <ion-input label="Nombre del insumo" labelPlacement="stacked" formControlName="nombreInsumo" placeholder="Ej. Queso Oaxaca"></ion-input>
+        <ion-input type="number" label="Cantidad" labelPlacement="stacked" formControlName="cantidad"></ion-input>
+        <ion-select label="Unidad" labelPlacement="stacked" formControlName="unidad" interface="popover">
+          <ion-select-option value="pza">Pieza (pza)</ion-select-option>
+          <ion-select-option value="kg">Kilogramo (kg)</ion-select-option>
+          <ion-select-option value="g">Gramo (g)</ion-select-option>
+          <ion-select-option value="l">Litro (l)</ion-select-option>
+          <ion-select-option value="ml">Mililitro (ml)</ion-select-option>
+        </ion-select>
+
+        <ion-button expand="block" type="submit" [disabled]="form.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ isEditing ? 'Guardar cambios' : 'Crear insumo' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-toast [isOpen]="showToast" [message]="toastMsg" position="bottom" duration="1600"></ion-toast>
+
+<!-- =================== Proveedores =================== -->
+<div class="prov-head">
+  <h3>Proveedores</h3>
+
+  <div class="prov-actions">
+    <ion-searchbar
+      placeholder="Buscar proveedor..."
+      (ionInput)="onSearchProv($any($event.target).value || '')"
+      showClearButton="focus"
+      class="prov-search"
+    ></ion-searchbar>
+
+    <ion-button class="btn-nuevo" (click)="abrirNuevoProv()">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Nuevo proveedor
+    </ion-button>
+  </div>
+</div>
+
+<!-- Estados Proveedores -->
+<ng-container *ngIf="loadingProv">
+  <div class="prov-grid">
+    <ion-card class="prov-card" *ngFor="let n of [1,2,3,4,5,6]">
+      <ion-card-content>
+        <div class="prov-top">
+          <div class="prov-avatar skeleton"></div>
+          <div class="prov-meta">
+            <div class="prov-name"><ion-skeleton-text [animated]="true" style="width: 90px"></ion-skeleton-text></div>
+            <div class="prov-mail"><ion-skeleton-text [animated]="true" style="width: 120px"></ion-skeleton-text></div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loadingProv && errorProv">
+  <div class="state">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <p>No se pudo cargar proveedores.</p>
+    <ion-button (click)="reloadProv()">Reintentar</ion-button>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loadingProv && !errorProv && proveedoresFiltrados.length === 0">
+  <div class="state">
+    <ion-icon name="people-outline" size="large"></ion-icon>
+    <p>Sin proveedores.</p>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loadingProv && !errorProv && proveedoresFiltrados.length">
+  <div class="prov-grid">
+    <ion-card class="prov-card" *ngFor="let p of proveedoresFiltrados">
+      <ion-card-content>
+        <div class="prov-top">
+          <div class="prov-avatar">{{ p.nombre?.charAt(0) | uppercase }}</div>
+          <div class="prov-meta">
+            <div class="prov-name">{{ p.nombre }}</div>
+            <div class="prov-mail">{{ p.correoProveedor }}</div>
+          </div>
+        </div>
+
+        <div class="prov-bottom">
+          <ion-badge color="light">
+            <ion-icon name="call-outline"></ion-icon>&nbsp;{{ p.telefono }}
+          </ion-badge>
+
+          <div class="prov-actions-mini">
+            <ion-button size="small" fill="clear" (click)="abrirEditarProv(p)">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button size="small" fill="clear" color="danger" (click)="eliminarProv(p)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ng-container>
+
+<!-- Modal Crear/Editar Proveedor -->
+<ion-modal [isOpen]="showProvModal" (didDismiss)="cerrarProvModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ isEditingProv ? 'Editar proveedor' : 'Nuevo proveedor' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarProvModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="provForm" (ngSubmit)="guardarProv()" class="form">
+        <ion-input
+          label="Nombre"
+          labelPlacement="stacked"
+          formControlName="nombre"
+          placeholder="Ej. LUMA">
+        </ion-input>
+
+        <ion-input
+          label="Teléfono"
+          labelPlacement="stacked"
+          formControlName="telefono"
+          placeholder="534-9101">
+        </ion-input>
+
+        <ion-input
+          type="email"
+          label="Correo"
+          labelPlacement="stacked"
+          formControlName="correoProveedor"
+          placeholder="ventas@lumapremium.com">
+        </ion-input>
+
+        <ion-button expand="block" type="submit" [disabled]="provForm.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ isEditingProv ? 'Guardar cambios' : 'Crear proveedor' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

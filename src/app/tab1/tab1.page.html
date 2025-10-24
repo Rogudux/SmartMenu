@@ -1,17 +1,42 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+    <ion-title>Pedidos</ion-title>
+
+    <ion-buttons slot="end">
+      <div class="user-box" *ngIf="user$ | async as user">
+        <div class="avatar">{{ user.nombre?.charAt(0) }}</div>
+        <div class="name">
+          <p>{{ user.nombre }}</p>
+        </div>
+      </div>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
+      <ion-title size="large">Pedidos</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+<div class="filter-wrap">
+  <ion-segment [value]="selectedFilter" (ionChange)="onFilterChange($event)">
+    <ion-segment-button value="todos"><ion-label>Todos</ion-label></ion-segment-button>
+    <ion-segment-button value="listo"><ion-label>Listo</ion-label></ion-segment-button>
+    <ion-segment-button value="en preparacion"><ion-label>En prep.</ion-label></ion-segment-button>
+    <ion-segment-button value="pendiente"><ion-label>Pendiente</ion-label></ion-segment-button>
+    <ion-segment-button value="entregado"><ion-label>Entregado</ion-label></ion-segment-button>
+  </ion-segment>
+
+  <!-- Nuevo pedido -->
+  <ion-button class="btn-nuevo" size="default" (click)="lista.abrirNuevo()">
+    <ion-icon name="add-outline" slot="start"></ion-icon>
+    Nuevo
+  </ion-button>
+</div>
+
+<!-- referencia al hijo -->
+<app-lista-pedidos #lista [filtro]="selectedFilter"></app-lista-pedidos>
+
 </ion-content>

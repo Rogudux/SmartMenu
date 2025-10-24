@@ -1,0 +1,135 @@
+<!-- Lista minimalista de pedidos -->
+<ion-list class="order-list">
+  <ion-item
+    *ngFor="let p of pedidosFiltrados; trackBy: trackById"
+    lines="full"
+    class="order-item"
+    [button]="true"
+  >
+    <ion-icon slot="start" name="receipt-outline"></ion-icon>
+
+    <ion-label>
+      <h2>Pedido #{{ p.id }} — Mesa {{ p.mesa }}</h2>
+      <p class="meta">
+        <ion-icon name="person-outline"></ion-icon>
+        {{ p.nombreUsuario }}
+        &nbsp;&middot;&nbsp;
+        <ion-icon name="time-outline"></ion-icon>
+        {{ toDate(p.fecha) | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </ion-label>
+
+    <div slot="end" class="end">
+      <div class="total">{{ p.total | currency:'MXN':'symbol':'1.0-0' }}</div>
+      <ion-badge class="estado" [ngClass]="estadoClase(p.estado)">{{ p.estado }}</ion-badge>
+
+      <div class="actions">
+        <ion-button size="small" fill="clear" (click)="abrirEditar(p)">
+          <ion-icon name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="eliminar(p)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+  </ion-item>
+</ion-list>
+
+<!-- Modal Crear/Editar -->
+<ion-modal [isOpen]="showModal" (didDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ isEditing ? 'Editar estado del pedido' : 'Nuevo pedido' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+        <!-- Mesa / ID Usuario solo lectura cuando isEditing -->
+        <ion-input
+          type="number"
+          label="Mesa"
+          labelPlacement="stacked"
+          formControlName="mesa"
+          [disabled]="isEditing">
+        </ion-input>
+
+        <ion-input
+          type="number"
+          label="ID Usuario"
+          labelPlacement="stacked"
+          formControlName="idUsuario"
+          [disabled]="isEditing">
+        </ion-input>
+
+        <!-- Estado: único campo editable en edición -->
+        <ion-select
+          label="Estado"
+          labelPlacement="stacked"
+          formControlName="estado"
+          interface="popover">
+          <ion-select-option value="pendiente">Pendiente</ion-select-option>
+          <ion-select-option value="en preparacion">En preparación</ion-select-option>
+          <ion-select-option value="listo">Listo</ion-select-option>
+          <ion-select-option value="entregado">Entregado</ion-select-option>
+        </ion-select>
+
+        <!-- Platillos: solo lectura en edición -->
+        <div class="platillos">
+          <div class="header">
+            <strong>Platillos</strong>
+            <!-- Agregar filas solo cuando NO se edita -->
+            <ion-button size="small" fill="clear" (click)="addPlatRow()" *ngIf="!isEditing">
+              <ion-icon name="add-outline"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div formArrayName="platillos" class="rows">
+            <div class="row" *ngFor="let fg of platillosFA.controls; let i = index" [formGroupName]="i">
+              <ion-input
+                type="number"
+                label="ID Platillo"
+                labelPlacement="stacked"
+                formControlName="idPlatillo"
+                placeholder="Ej. 17"
+                [readonly]="isEditing">
+              </ion-input>
+
+              <ion-input
+                type="number"
+                label="Cantidad"
+                labelPlacement="stacked"
+                formControlName="cantidad"
+                placeholder="Ej. 2"
+                [readonly]="isEditing">
+              </ion-input>
+
+              <!-- Quitar filas solo cuando NO se edita -->
+              <ion-button
+                size="small"
+                fill="clear"
+                color="danger"
+                (click)="removePlatRow(i)"
+                *ngIf="!isEditing"
+                [disabled]="platillosFA.length === 1">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <ion-button expand="block" type="submit" [disabled]="form.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ isEditing ? 'Guardar estado' : 'Crear pedido' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Toast -->
+<ion-toast [isOpen]="showToast" [message]="toastMsg" position="bottom" duration="1600"></ion-toast>

@@ -1,0 +1,100 @@
+<!-- Buscador -->
+<div class="controls">
+  <ion-searchbar
+    placeholder="Buscar cliente..."
+    (ionInput)="onSearch($any($event.target).value || '')"
+    showClearButton="focus"
+    class="search"
+  ></ion-searchbar>
+</div>
+
+<!-- Estado: cargando -->
+<ng-container *ngIf="loading">
+  <ion-list class="client-list">
+    <ion-item *ngFor="let n of [1,2,3,4]" lines="full" class="client-item">
+      <ion-icon slot="start" name="person-outline"></ion-icon>
+      <ion-label>
+        <h2><ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text></h2>
+        <p><ion-skeleton-text [animated]="true" style="width: 70%"></ion-skeleton-text></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ng-container>
+
+<!-- Estado: error -->
+<ng-container *ngIf="!loading && error">
+  <div class="state">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <p>No se pudo cargar la lista.</p>
+    <ion-button (click)="reload()">Reintentar</ion-button>
+  </div>
+</ng-container>
+
+<!-- Estado: vacío -->
+<ng-container *ngIf="!loading && !error && listaFiltrada.length === 0">
+  <div class="state">
+    <ion-icon name="person-outline" size="large"></ion-icon>
+    <p>Sin clientes.</p>
+  </div>
+</ng-container>
+
+<!-- Lista -->
+<ng-container *ngIf="!loading && !error && listaFiltrada.length">
+  <ion-list class="client-list">
+    <ion-item
+      *ngFor="let c of listaFiltrada; trackBy: trackById"
+      lines="full"
+      class="client-item"
+    >
+      <ion-icon slot="start" name="person-outline"></ion-icon>
+
+      <ion-label>
+        <h2>{{ c.nombre }}</h2>
+        <p class="meta">
+          <ion-icon name="call-outline"></ion-icon> {{ c.telefono }}
+          &nbsp;&middot;&nbsp;
+          <ion-icon name="mail-outline"></ion-icon> {{ c.correoCliente }}
+        </p>
+      </ion-label>
+
+      <div slot="end" class="actions">
+        <ion-button size="small" fill="clear" (click)="abrirEditar(c)">
+          <ion-icon name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="eliminar(c)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+</ng-container>
+
+<!-- Modal Crear/Editar -->
+<ion-modal [isOpen]="showModal" (didDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ isEditing ? 'Editar cliente' : 'Nuevo cliente' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+        <ion-input label="Nombre" labelPlacement="stacked" formControlName="nombre" placeholder="Nombre completo"></ion-input>
+        <ion-input label="Teléfono" labelPlacement="stacked" formControlName="telefono" inputmode="tel"></ion-input>
+        <ion-input label="Correo" labelPlacement="stacked" formControlName="correoCliente" type="email"></ion-input>
+
+        <ion-button expand="block" type="submit" [disabled]="form.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ isEditing ? 'Guardar cambios' : 'Crear cliente' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Toast -->
+<ion-toast [isOpen]="showToast" [message]="toastMsg" position="bottom" duration="1600"></ion-toast>

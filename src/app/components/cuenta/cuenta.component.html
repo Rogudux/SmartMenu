@@ -1,0 +1,186 @@
+<!-- Template de carga para el else -->
+<ng-template #loadingTpl>
+  <ion-card class="me-card">
+    <ion-card-content>
+      <div class="me-header">
+        <div class="avatar skeleton"></div>
+        <div class="info">
+          <h2><ion-skeleton-text [animated]="true" style="width: 140px"></ion-skeleton-text></h2>
+          <ion-badge color="medium">
+            <ion-skeleton-text [animated]="true" style="width: 60px"></ion-skeleton-text>
+          </ion-badge>
+        </div>
+      </div>
+      <ion-item lines="full"><ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text></ion-item>
+      <ion-item lines="full"><ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text></ion-item>
+    </ion-card-content>
+  </ion-card>
+</ng-template>
+
+<!-- ========== MI CUENTA (vista + edición con botón discreto) ========== -->
+<ion-card class="me-card" *ngIf="me as u; else loadingTpl">
+  <ion-card-content>
+    <div class="me-header">
+      <div class="avatar">{{ u.nombre?.charAt(0) | uppercase }}</div>
+      <div class="info">
+        <h2>{{ u.nombre }}</h2>
+        <ion-badge color="medium">{{ rolNombre(u.idRol) }}</ion-badge>
+      </div>
+
+      <!-- Acciones: Editar (solo cuando NO estás editando) + Logout siempre -->
+      <ion-buttons slot="end">
+        <ion-button fill="clear" size="small" *ngIf="!meEditMode" (click)="entrarEditarMe()">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          Editar
+        </ion-button>
+
+        <ion-button fill="clear" size="small" (click)="onLogout()" aria-label="Cerrar sesión">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </div>
+
+    <!-- Vista (solo lectura) -->
+    <ng-container *ngIf="!meEditMode; else editForm">
+      <ion-item lines="full">
+        <ion-label position="stacked">Nombre</ion-label>
+        <div>{{ u.nombre }}</div>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Correo</ion-label>
+        <div>{{ u.correo }}</div>
+      </ion-item>
+    </ng-container>
+
+    <!-- Formulario de edición -->
+    <ng-template #editForm>
+      <form [formGroup]="meForm" (ngSubmit)="guardarMe()" class="me-form">
+        <ion-item lines="full">
+          <ion-label position="stacked">Nombre</ion-label>
+          <ion-input formControlName="nombre"></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="stacked">Correo</ion-label>
+          <ion-input type="email" formControlName="correo"></ion-input>
+        </ion-item>
+
+        <div class="password-note">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          Para guardar cambios, escribe tu <b>contraseña actual</b>.
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="stacked">Contraseña actual</ion-label>
+          <ion-input type="password" formControlName="currentPassword"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label>Cambiar contraseña</ion-label>
+          <ion-toggle
+            [checked]="changePassword"
+            (ionChange)="onToggleChangePassword($any($event.detail).checked)">
+          </ion-toggle>
+        </ion-item>
+
+        <div *ngIf="changePassword">
+          <div class="password-note">
+            Para cambiar tu contraseña, escribe la <b>actual</b> y la <b>nueva</b> dos veces.
+          </div>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">Nueva contraseña</ion-label>
+            <ion-input type="password" formControlName="newPassword"></ion-input>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">Confirmar nueva contraseña</ion-label>
+            <ion-input type="password" formControlName="newPassword2"></ion-input>
+          </ion-item>
+
+          <div class="field-hint" *ngIf="meForm.errors?.['passwordMismatch'] && (meForm.dirty || meForm.touched)">
+            Las contraseñas no coinciden.
+          </div>
+        </div>
+
+        <div class="me-actions">
+          <ion-button fill="clear" (click)="cancelarEditarMe()">
+            Cancelar
+          </ion-button>
+          <ion-button type="submit" [disabled]="meForm.invalid || savingMe">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            Guardar
+          </ion-button>
+        </div>
+      </form>
+    </ng-template>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- ========== EQUIPO (se mantiene como lo tenías) ========== -->
+<div class="team-head">
+  <h3>Equipo de trabajo</h3>
+  <div class="actions">
+    <ion-searchbar placeholder="Buscar por nombre, correo o rol" (ionInput)="onSearch($any($event.target).value || '')" showClearButton="focus"></ion-searchbar>
+    <ion-button class="btn-nuevo" (click)="abrirNuevo()">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Nuevo usuario
+    </ion-button>
+  </div>
+</div>
+
+<ng-container *ngIf="loadingEquipo">
+  <ion-list>
+    <ion-item *ngFor="let n of [1,2,3,4]" lines="full">
+      <ion-icon slot="start" name="person-outline"></ion-icon>
+      <ion-label>
+        <h2><ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text></h2>
+        <p><ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ng-container>
+
+<ng-container *ngIf="!loadingEquipo && errorEquipo">
+  <div class="state">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <p>No se pudo cargar el equipo.</p>
+    <ion-button (click)="reloadEquipo()">Reintentar</ion-button>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loadingEquipo && !errorEquipo && equipoFiltrado.length === 0">
+  <div class="state">
+    <ion-icon name="people-outline" size="large"></ion-icon>
+    <p>Sin usuarios.</p>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!loadingEquipo && !errorEquipo && equipoFiltrado.length">
+  <div class="team-grid">
+    <ion-card *ngFor="let m of equipoFiltrado; trackBy: trackById" class="member-card" [class.is-me]="me?.id===m.id">
+      <ion-card-content>
+        <div class="member-head">
+          <div class="mini-avatar">{{ m.nombre?.charAt(0) | uppercase }}</div>
+          <div class="meta">
+            <div class="name">{{ m.nombre }}</div>
+            <ion-badge color="medium">{{ m.nombreRol || rolNombre(m.idRol) }}</ion-badge>
+          </div>
+        </div>
+        <div class="mail">{{ m.correo }}</div>
+
+        <div class="member-actions">
+          <ion-button size="small" fill="clear" (click)="abrirEditar(m)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button size="small" fill="clear" color="danger" (click)="eliminarUser(m)" [disabled]="me?.id===m.id">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ng-container>
+
+<!-- Modal crear/editar (equipo) y Toast se quedan igual que antes -->

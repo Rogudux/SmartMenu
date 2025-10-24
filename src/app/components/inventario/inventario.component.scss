@@ -1,0 +1,81 @@
+:host { --brand: var(--ion-color-primary, #ff7a00); }
+
+/* ===== Inventario (existente) ===== */
+.controls { background:#fff; padding:10px 12px 6px; border-bottom:1px solid rgba(0,0,0,0.06); }
+.search { --background:#fff; margin-bottom:8px; }
+.bar { display:flex; justify-content:flex-end; }
+.btn-nuevo { --background: var(--brand); --color: #fff; --border-radius: 10px; box-shadow: 0 6px 14px rgba(255,122,0,.18); }
+.inv-list { background:#fff; }
+.inv-item { --background:#fff; --inner-padding-start:12px; --inner-padding-end:12px; }
+.inv-item ion-icon[slot="start"] { font-size:22px; color:var(--brand); margin-right:6px; }
+.inv-item h2 { margin:0 0 2px; font-weight:800; font-size:16px; color:#111827; }
+.inv-item .meta { margin:0; display:flex; align-items:center; gap:6px; color:#6b7280; font-size:13px; }
+.inv-item .meta ion-icon { font-size:14px; color:#9ca3af; }
+.actions { display:inline-flex; gap:2px; }
+.actions ion-button[fill="clear"] { --padding-start:6px; --padding-end:6px; --color:#253042; }
+.actions ion-button[color="danger"] { --color:#dc2626; }
+.state { padding:48px 24px; text-align:center; color:#6b7280; }
+.state ion-icon { color:var(--brand); margin-bottom:8px; }
+.form ion-input, .form ion-select { margin-bottom:12px; }
+
+/* ===== Proveedores ===== */
+.prov-head { padding: 6px 12px 0; }
+.prov-head h3 { margin: 10px 0 6px; font-size: 16px; color: #111827; font-weight: 800; }
+
+/* barra superior: buscador + botón nuevo proveedor */
+.prov-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 0 12px 6px;
+}
+.prov-search { --background:#fff; }
+.prov-actions .btn-nuevo {
+  --background: var(--brand);
+  --color: #fff;
+  --border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(255,122,0,.18);
+}
+
+/* grid de mini-cards */
+.prov-grid {
+  padding: 8px 12px 16px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 660px) { .prov-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 920px) { .prov-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.prov-card { border-radius: 14px; }
+.prov-top { display:flex; gap:10px; align-items:center; }
+
+.prov-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #fff3e6; color: #ff7a00; display: grid; place-items: center; font-weight: 800;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.prov-avatar.skeleton { background:#eee; border-color:#eee; color:transparent; }
+
+.prov-meta { min-width: 0; }
+.prov-name { font-weight: 800; color:#111827; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.prov-mail { color:#6b7280; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* badge + acciones mini alineadas */
+.prov-bottom {
+  margin-top:8px;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.prov-bottom ion-badge { --background:#f3f4f6; --color:#253042; }
+
+/* acciones mini en cada card */
+.prov-actions-mini { display:inline-flex; gap:2px; }
+.prov-actions-mini ion-button[fill="clear"] { --padding-start:6px; --padding-end:6px; --color:#253042; }
+.prov-actions-mini ion-button[color="danger"] { --color:#dc2626; }
+
+/* Icons color sync */
+ion-badge ion-icon { vertical-align: -2px; }

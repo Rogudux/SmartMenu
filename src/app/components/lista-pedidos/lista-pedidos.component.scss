@@ -1,0 +1,49 @@
+/* Base del badge (puedes mantenerlo) */
+.estado {
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+  /* Por si algún tema mete color por defecto: */
+  --background: color-mix(in srgb, var(--brand) 12%, #000 0%);
+  --color: var(--brand);
+}
+
+/* Colores por estado — usa variables del componente */
+.estado--listo {
+  --background: #10B981;  /* emerald-500 */
+  --color: #ffffff;
+}
+
+.estado--preparacion {
+  --background: #F59E0B;  /* amber-500 */
+  --color: #111827;
+}
+
+.estado--pendiente {
+  --background: #5B21B6;  /* violet-900 */
+  --color: #ffffff;
+}
+
+.estado--entregado {
+  --background: linear-gradient(135deg, #06B6D4, #3B82F6); /* cyan→blue */
+  --color: #ffffff;
+}
+
+/* fallback genérico */
+.estado--otros {
+  --background: #9CA3AF; /* gray-400 */
+  --color: #111827;
+}
+
+.end { display: grid; gap: 4px; justify-items: end; align-items: center; }
+.actions { display: inline-flex; gap: 2px; }
+.actions ion-button[fill="clear"] { --padding-start: 6px; --padding-end: 6px; }
+.actions ion-button[color="danger"] { --color: #dc2626; }
+.form ion-input, .form ion-select { margin-bottom: 12px; }
+
+.form ion-input, .form ion-select { margin-bottom: 12px; }
+.platillos .header { display:flex; justify-content:space-between; align-items:center; margin: 8px 0; }
+.platillos .rows .row { display:grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items:end; margin-bottom: 8px; }
